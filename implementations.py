@@ -12,7 +12,7 @@ def compute_err(y,tx,w):
 
 def compute_loss(y, tx, w):
     err = compute_err(y,tx,w)
-    return 1/2*np.mean(err**2)
+    return 1/2*err.T.dot(err)/len(y)
 
 
 def compute_gradient(y, tx, w):
@@ -35,7 +35,7 @@ def compute_logistic_gradient(y,tx,w):
 
 def compute_logistic_loss(y,tx,w):
     """compute the cost by negative log likelihood."""
-    loss = np.log(1+np.exp(tx.T.dot(w))).sum() + y.dot(tx.T.dot(w))
+    loss = np.log(1+np.exp(tx.dot(w))).sum() - y.dot(tx.dot(w))
     return loss
     
 
@@ -74,8 +74,8 @@ def least_squares(y, tx):
     return w, loss
 
 def ridge_regression(y, tx, lambda_):
-    N = tx.shape(0)
-    D = tx.shape(1)
+    N = tx.shape[0]
+    D = tx.shape[1]
     
     w = np.linalg.solve(tx.T.dot(tx)+lambda_*2*N*np.eye(D),tx.T.dot(y))
     loss = compute_loss(y,tx,w) + lambda_*w.T.dot(w).squeeze()
