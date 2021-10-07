@@ -22,54 +22,23 @@ print('Start cleaning data...')
 # lambda_ = 2
 # w, loss = ridge_regression(y, tX[:,0], lambda_)
 
+tX_final = drop_empty(tX,40)
 
-def drop_empty(tx,thres):
-    N = tx.shape[0]
-    D = tx.shape[1]
-    mask = np.array(tx == -999, dtype = int)
-    mask_sum = np.sum(mask,axis=0)
-    perc = 100*mask_sum/N
-    
-    cleaner = perc < thres
-    tx_clean = tx[:,cleaner]
-    
-    for i in range(D):
-        if perc[i] > thres:
-           print('The', i+1,'th column is dropped')
-           
-    # Maybe remove outliers: value over 2000
-           
-    return tx_clean
+jet_col, tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j = sep_by_jet(tX_final,y) 
 
 
 
 
-tX_clean = drop_empty(tX,40)
+degree = 5
 
+tx_train_0j, tx_test_0j, idx_test_0j = proc_jet(tX_final, degree, 0, tX_0j, jet_col)
 
+lambda_ = 1e-8
+w_0j, _ = ridge_regression(y_0j, tx_train_0j, lambda_)
 
-def sep_by_jet(tx):
+# y_pred0 = predict_labels(w_0j, tx_test_0j)
 
-    # Split data into subdatasets of different number of jet (which is the jet_num value)
-    # because different number of particles means different behaviors and proportions (mass, etc.)
-    # Note: The col PRI_jet_all_pt has a 0 when jet_num has a 0
-    
-    tX_0j = tx[tx[:,23] == 0]
-    tX_1j = tx[tx[:,23] == 1]
-    tX_2j = tx[tx[:,23] == 2]
-    tX_3j = tx[tx[:,23] == 3]
-    
-    y_0j = y[tx[:,23] == 0]
-    y_1j = y[tx[:,23] == 1]
-    y_2j = y[tx[:,23] == 2]
-    y_3j = y[tx[:,23] == 3]
-    
-    return tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j
-
-print(sep_by_jet(tX))
-        
-
-
+# PROCESS DATA
 
 
 

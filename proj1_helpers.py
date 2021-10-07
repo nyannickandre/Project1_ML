@@ -58,6 +58,86 @@ def split_data(x, y, ratio, myseed=1):
     y_te = y[index_te]
     return x_tr, x_te, y_tr, y_te
 
+
+# ------- Clean and preprocess -------
+
+
+def drop_empty(tx,thres):
+    N = tx.shape[0]
+    D = tx.shape[1]
+    mask = np.array(tx == -999, dtype = int)
+    mask_sum = np.sum(mask,axis=0)
+    perc = 100*mask_sum/N
+    
+    cleaner = perc < thres
+    tx_clean = tx[:,cleaner]
+    
+    for i in range(D):
+        if perc[i] > thres:
+           print('The', i+1,'th column is dropped')
+           
+    # Maybe remove outliers: value over 2000
+           
+    return tx_clean
+
+
+
+def sep_by_jet(tx,y):
+
+    # Split data into subdatasets of different number of jet (which is the jet_num value)
+    # because different number of particles means different behaviors and proportions (mass, etc.)
+    # Find this columns by looking for the largest amount of 1, 2 and 3
+    # Note: The col PRI_jet_all_pt has a 0 when jet_num has a 0
+    
+    _, col = np.where((tx == 1) | (tx == 2) | (tx == 3))
+    jet_col = np.argmax(np.bincount(col))
+    
+    tX_0j = tx[tx[:,jet_col] == 0]
+    tX_1j = tx[tx[:,jet_col] == 1]
+    tX_2j = tx[tx[:,jet_col] == 2]
+    tX_3j = tx[tx[:,jet_col] == 3]
+    
+    y_0j = y[tx[:,jet_col] == 0]
+    y_1j = y[tx[:,jet_col] == 1]
+    y_2j = y[tx[:,jet_col] == 2]
+    y_3j = y[tx[:,jet_col] == 3]
+    
+    return jet_col, tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j
+
+
+
+def proc_jet(tx, degree, num_jet, tx_jet, jet_col):
+    
+    # Split data in 4 subdatasets with different number of jets
+    
+    idx_test = (tx[:, jet_col] == num_jet)
+    
+    tx_test = tx[idx_test]
+
+    # Delete the Jet_col column
+    if num_jet == 0:
+        # delete the last column because it is full of 0's when jet_num = 0
+        tx_test_jet = np.delete(tx_test, [jet_col, tx_test.shape[1] - 1], 1)
+
+    else:
+        tx_test_jet = np.delete(tx_test, jet_col, 1)
+
+    # Build a polynomial function of given degree
+    tx_train_poly = build_poly(tx_jet, degree)
+    tx_test_poly = build_poly(tx_test_jet, degree)
+
+    # Standardization of the polynome
+    tx_train_stand, mean_tx_train, std_tx_train = standardize(tx_train_poly)
+    tx_test_stand = (tx_test_poly - mean_tx_train) / std_tx_train
+    # Adding offset
+    tx_off = np.insert(tx_train_stand, 0, np.ones(tx_jet.shape[0]), axis=1)
+    tx_test_off = np.insert(tx_test_stand, 0, np.ones(tx_test_stand.shape[0]), axis=1)
+    
+    return tx_off, tx_test_off, idx_test
+
+
+
+
 def build_poly(x, degree):
     """polynomial basis functions for input data x, for j=0 up to j=degree."""
     poly = np.ones((len(x), 1))
