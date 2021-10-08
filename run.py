@@ -8,33 +8,23 @@ DATA_TRAIN_PATH = 'data/train.csv' # TODO: download train data and supply path h
 y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 
 # print('Loading test data...')
-# DATA_TEST_PATH = 'data/train.csv' # TODO: download train data and supply path here 
+# DATA_TEST_PATH = 'data/test.csv' # TODO: download train data and supply path here 
 # _, tX_test, ids_test = load_csv_data(DATA_TEST_PATH)
 
 
 # ## Cleaning data
 print('Start cleaning data...')
 
+tX_final = drop_empty(tX,40,3)
 
-# initial_w = np.zeros(tX.shape[1])
-# max_iters = 50
-# gamma = 0.7
-# lambda_ = 2
-# w, loss = ridge_regression(y, tX[:,0], lambda_)
+tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j = sep_by_jet(tX_final,y) 
 
-tX_final = drop_empty(tX,40)
+# degree = 5
 
-jet_col, tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j = sep_by_jet(tX_final,y) 
+# tx_train_0j, tx_test_0j, idx_test_0j = proc_jet(tX_final, degree, 0, tX_0j)
 
-
-
-
-degree = 5
-
-tx_train_0j, tx_test_0j, idx_test_0j = proc_jet(tX_final, degree, 0, tX_0j, jet_col)
-
-lambda_ = 1e-8
-w_0j, _ = ridge_regression(y_0j, tx_train_0j, lambda_)
+# lambda_ = 1e-8
+# w_0j, _ = ridge_regression(y_0j, tx_train_0j, lambda_)
 
 # y_pred0 = predict_labels(w_0j, tx_test_0j)
 
