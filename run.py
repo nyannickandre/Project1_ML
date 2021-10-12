@@ -19,14 +19,15 @@ tX_final = drop_empty(tX,40,3)
 
 tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j = sep_by_jet(tX_final,y) 
 
-# degree = 5
+degree = 6
 
-# tx_train_0j, tx_test_0j, idx_test_0j = proc_jet(tX_final, degree, 0, tX_0j)
+tx_train_0j, tx_test_0j, idx_test_0j = proc_jet(tX_0j, degree, 0, tX_0j)
 
-# lambda_ = 1e-8
-# w_0j, _ = ridge_regression(y_0j, tx_train_0j, lambda_)
+lambda_ = 1
+w_0j, _ = ridge_regression(y_0j, tx_train_0j, lambda_)
 
-# y_pred0 = predict_labels(w_0j, tx_test_0j)
+y_pred0 = predict_labels(w_0j, tx_test_0j)
+
 
 # PROCESS DATA
 

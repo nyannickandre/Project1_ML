@@ -66,6 +66,11 @@ def build_poly(x, degree):
     poly = np.ones((len(x), 1))
     for deg in range(1, degree+1):
         poly = np.c_[poly, np.power(x, deg)]
+    
+    # poly = x.copy()
+    # for deg in range(2, degree + 1):
+    #     poly = np.hstack([poly, poly**deg])
+        
     return poly
 
 def standardize(x):
@@ -151,21 +156,13 @@ def drop_empty(tx,thres,nb_sig):
     
     # Change all the -999 in tx_clean into nan
     tx_clean[tx_clean == -999] = np.NAN
-    # Create a mask in binary to get the position of all the nan 
-    mask = np.array(np.isnan(tx_clean), dtype = int)
-    # Sum all the 1 in each column to get the percentage of nan in each column
-    mask_sum = np.sum(mask,axis=0)
-    perc = 100*mask_sum/N
-    
-    # For each column if the percentage is inferior to the chosen threshold then the column is kept
-    cleaner = perc < thres
-    tx_clean = tx_clean[:,cleaner]
-    
+
     # Get the mean and standard deviation vectors
     tx_mean, tx_dev = stat_val(tx_clean)
     
     # Create tx_z as the normalization of tx_clean
     tx_z = (tx_clean - tx_mean[None,:])/tx_dev[None,:]
+    
     # Change the outliers in each column into nan
     # Small issues with the two following lines: create a runtime warning error
     tx_z[tx_z > nb_sig] = np.NAN 
@@ -174,9 +171,21 @@ def drop_empty(tx,thres,nb_sig):
     # Put jet_num back into tx_z in the first column
     tx_z = np.concatenate((jet_num,tx_z),axis = 1)
     
-    # for i in range(D):
-    #     if perc[i] > thres:
-    #         print('The', i+1,'th column is dropped')
+    # Create a mask in binary to get the position of all the nan 
+    mask = np.array(np.isnan(tx_z), dtype = int)
+    
+    # Sum all the 1 in each column to get the percentage of nan in each column
+    mask_sum = np.sum(mask,axis=0)
+    perc = 100*mask_sum/N
+
+    # Create a mask for the column where the percentage of nan is inferior to the threshold
+    cleaner = perc < thres
+    tx_z = tx_z[:,cleaner] #Delete column where there is too many nan
+    
+    #Print the column that are dropped
+    for i in range(D):
+        if perc[i] > thres:
+            print('The', i+1,'th column is dropped')
            
            
     return tx_z
@@ -189,6 +198,7 @@ def sep_by_jet(tx,y):
     # Note: The col PRI_jet_all_pt has a 0 when jet_num has a 0   
 
     jet_col = 0
+    
     
     tX_0j = tx[tx[:,jet_col] == 0]
     tX_1j = tx[tx[:,jet_col] == 1]
@@ -205,27 +215,29 @@ def sep_by_jet(tx,y):
 
 
 def proc_jet(tx, degree, num_jet, tx_jet):
-    #C'EST LE BORDEL
     
+
     jet_col = 0
     
     idx_test = (tx[:, jet_col] == num_jet)
-    
+    print('------------------------------------------------------')
+    print(idx_test)
     
     tx_test = tx[idx_test]
     
+    
     # Delete the Jet_col column
-    if num_jet == 0:
-        # delete the last column because it is full of 0's when jet_num = 0
-        tx_test_jet = np.delete(tx_test, [jet_col, tx_test.shape[1] - 1], 1)
-
-    else:
-        tx_test_jet = np.delete(tx_test, jet_col, 1)
+    tx_test_jet = np.delete(tx_test, jet_col, 1)
     
 
     # Build a polynomial function of given degree
     tx_train_poly = build_poly(tx_jet, degree)
+    print('------------------------------------------------------')
+    print(tx_train_poly)
+    print('------------------------------------------------------')
+    print(tx_train_poly.shape)
     tx_test_poly = build_poly(tx_test_jet, degree)
+
 
     # Standardization of the polynome
     tx_train_stand, mean_tx_train, std_tx_train = standardize(tx_train_poly)
