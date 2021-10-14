@@ -21,7 +21,8 @@ def load_csv_data(data_path, sub_sample=False):
 
 def predict_labels(weights, data):
     """Generates class predictions given weights, and a test data matrix"""
-    y_pred = np.dot(data, weights)
+    masked_data = np.nan_to_num(data)
+    y_pred = np.dot(masked_data, weights)
     y_pred[np.where(y_pred <= 0)] = -1
     y_pred[np.where(y_pred > 0)] = 1
     
@@ -75,9 +76,9 @@ def build_poly(x, degree):
 
 def standardize(x):
     """Standardize the original data set."""
-    mean_x = np.mean(x)
+    mean_x = np.nanmean(x)
     x = x - mean_x
-    std_x = np.std(x)
+    std_x = np.nanstd(x)
     x = x / std_x
     return x, mean_x, std_x
 
@@ -227,22 +228,20 @@ def proc_jet(tx, degree, num_jet, tx_jet):
     
     
     # Delete the Jet_col column
-    tx_test_jet = np.delete(tx_test, jet_col, 1)
+    # tx_test_jet = np.delete(tx_test, [jet_col], 1)
     
 
     # Build a polynomial function of given degree
     tx_train_poly = build_poly(tx_jet, degree)
     print('------------------------------------------------------')
-    print(tx_train_poly)
-    print('------------------------------------------------------')
-    print(tx_train_poly.shape)
-    tx_test_poly = build_poly(tx_test_jet, degree)
 
+    tx_test_poly = build_poly(tx_test, degree)
 
     # Standardization of the polynome
     tx_train_stand, mean_tx_train, std_tx_train = standardize(tx_train_poly)
     tx_test_stand = (tx_test_poly - mean_tx_train) / std_tx_train
-    # Adding offset
+
+    # Offset to have the intercept
     tx_off = np.insert(tx_train_stand, 0, np.ones(tx_jet.shape[0]), axis=1)
     tx_test_off = np.insert(tx_test_stand, 0, np.ones(tx_test_stand.shape[0]), axis=1)
     
