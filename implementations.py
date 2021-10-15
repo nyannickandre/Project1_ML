@@ -76,8 +76,8 @@ def least_squares(y, tx):
 def ridge_regression(y, tx, lambda_):
     N = tx.shape[0]
     D = tx.shape[1]
-    tx = np.ma.array(tx)
-    masked_tx = np.nan_to_num(tx)
+    tx_z = np.ma.array(tx)
+    masked_tx = np.nan_to_num(tx_z)
     
     w = np.linalg.solve(masked_tx.T.dot(masked_tx)+lambda_*2*N*np.eye(D),masked_tx.T.dot(y))
     # w = np.linalg.solve(np.dot(tx.T,tx)+lambda_*2*N*np.eye(D),np.dot(tx.T,y))

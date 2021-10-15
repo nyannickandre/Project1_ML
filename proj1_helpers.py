@@ -119,7 +119,6 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
 
 # ------- Clean and preprocess -------
 
-
 def stat_val(tx):
     """"
     Generate the statistics values to normalize the data in tx
@@ -186,7 +185,7 @@ def drop_empty(tx,thres,nb_sig):
     #Print the column that are dropped
     for i in range(D):
         if perc[i] > thres:
-            print('The', i+1,'th column is dropped')
+            print('The {}th column is dropped'.format(i+1))
            
            
     return tx_z
@@ -213,7 +212,32 @@ def sep_by_jet(tx,y):
     
     return tX_0j, tX_1j, tX_2j, tX_3j, y_0j, y_1j, y_2j, y_3j
 
-
+def assemble_by_jet(y_0,y_1,y_2,y_3,tx):
+    
+    N = tx.shape[0]
+    y = np.zeros(N)
+    jet_num = tx[:,0]
+    count_0 = 0;
+    count_1 = 0;
+    count_2 = 0;
+    count_3 = 0;
+    
+    for i in range(N):
+        x = jet_num[i]
+        if x == 0:
+            y[i] = y_0[count_0]
+            count_0 = count_0 + 1
+        elif x == 1:
+            y[i] = y_1[count_1]
+            count_1 = count_1 + 1
+        elif x == 2:
+            y[i] = y_2[count_2]
+            count_2 = count_2 + 1
+        elif x == 3:
+            y[i] = y_3[count_3]
+            count_3 = count_3 + 1
+    
+    return y
 
 def proc_jet(tx, degree, num_jet, tx_jet):
     
