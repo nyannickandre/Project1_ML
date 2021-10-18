@@ -271,6 +271,38 @@ def proc_jet(tx, degree, num_jet, tx_jet):
     
     return tx_off, tx_test_off, idx_test
 
+# ------- Test -------
+
+def confusion_matrix(true, pred):
+    """ Computes the confusion matrix, as ratios
+
+    Args :
+        true (array, either 1 or -1) : True results
+        pred (array, either 1 or -1) : Predicted results
+
+    Returns :
+        confusion (2 x 2 array) : Confusion matrix. Top left is (true, true)
+    """
+
+    comparison = np.column_stack((true, pred))
+    confusion = np.zeros((2, 2))
+
+    for elem in comparison:
+        # true positives
+        if np.array_equal(elem, np.array([1, 1])):
+            confusion[0][0] += 1
+        # false positives
+        elif np.array_equal(elem, np.array([-1, 1])):
+            confusion[0, 1] += 1
+        # false negative
+        elif np.array_equal(elem, np.array([1, -1])):
+            confusion[1, 0] += 1
+        else:
+            confusion[1, 1] += 1
+
+    return confusion / len(true)
+
+
 
 
 

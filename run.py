@@ -40,7 +40,7 @@ percentage_accuracy = sum(np.array(y == y_pred_tot, dtype=int))*100/len(y)
 print('-------------------------------------------------------------------')
 print('The prediction is {}% accurate'.format(percentage_accuracy))
 
-
+print(confusion_matrix(y, y_pred_tot))
 
 
 
