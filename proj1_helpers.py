@@ -7,7 +7,12 @@ import numpy as np
 # ------------- Helpers for the project --------------------
 
 def load_csv_data(data_path, sub_sample=False):
-    """Loads data and returns y (class labels), tX (features) and ids (event ids)"""
+    """
+    Loads data
+    :param data_path
+    :param sub_sample: Eventually extract just part of the data
+    :return: class labels (either boson or not - dependent variable), dataset of independent variables, event ids
+    """
     y = np.genfromtxt(data_path, delimiter=",", skip_header=1, dtype=str, usecols=1)
     x = np.genfromtxt(data_path, delimiter=",", skip_header=1)
     ids = x[:, 0].astype(np.int)
@@ -21,21 +26,26 @@ def load_csv_data(data_path, sub_sample=False):
 
 
 def predict_labels(weights, data):
-    """Generates class predictions given weights, and a test data matrix"""
+    """
+    Generates class predictions given weights, and a test data matrix
+    :param weights: Predicted weights
+    :param data: Dataset of dependent variables
+    :return: Predicted class labels
+    """
     masked_data = np.nan_to_num(data)
     y_pred = np.dot(masked_data, weights)
     y_pred[np.where(y_pred <= 0)] = -1
     y_pred[np.where(y_pred > 0)] = 1
-
     return y_pred
 
 
 def create_csv_submission(ids, y_pred, name):
     """
-    Creates an output file in .csv format for submission to Kaggle or AIcrowd
-    Arguments: ids (event ids associated with each prediction)
-               y_pred (predicted class labels)
-               name (string name of .csv output file to be created)
+    Creates an output file with predictions in CSV format for submission to Kaggle or AIcrowd
+    :param ids: event ids associated with each prediction
+    :param y_pred: predicted class labels
+    :param name: string name of .csv output file to be created
+    :return: None
     """
     with open(name, 'w') as csvfile:
         fieldnames = ['Id', 'Prediction']
@@ -46,6 +56,9 @@ def create_csv_submission(ids, y_pred, name):
 
 
 # ---------- Helpers from previous labs -----------
+
+# Data from previous labs are not commented parameter by parameter, as their functionality is quite obvious
+# and has been explored in previous labs
 
 def split_data(x, y, ratio, myseed=1):
     """split the dataset based on the split ratio."""
@@ -99,13 +112,15 @@ def build_model_data(height, weight):
 def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
     """
     Generate a minibatch iterator for a dataset.
-    Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
-    Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
-    Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
-    Example of use :
-    for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
-        <DO-SOMETHING>
+    :param y: here the output desired values
+    :param tx: input data
+    :param batch_size: size of batches
+    :param num_batches: number of batches
+    :param shuffle: data: data can be randomly shuffled to avoid ordering in the original
+    data messing with the randomness of the minibatches.
+    :return: Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
     """
+
     data_size = len(y)
 
     if shuffle:
@@ -125,9 +140,10 @@ def batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
 # ------- Clean and preprocess -------
 
 def stat_val(tx):
-    """"
-    Generate the statistics values to normalize the data in tx
-    Return two vector containing respectively the mean and the standard deviation
+    """
+    Generates the statistics values to standardized the data in tx
+    :param tx: Dataset to be standardized
+    :return: Return two vector containing respectively the mean and the standard deviation
     of each column of tx
     """
     tx_mask = np.isnan(tx)  # create a mask for all of the nan values in tx
@@ -138,14 +154,14 @@ def stat_val(tx):
     return tx_mean, tx_dev
 
 
-def drop_empty(tx, thres, nb_sig):
+def drop_trash(tx, thres, nb_sig):
     """
-    @ TODO : finish comments
-    :param tx:
+    Cleans dataset of outliers and strange columns
+    :param tx: initial dataset
     :param thres: percentage of -999 in a column at which the column should be removed from tx
-    :param nb_sig: number of standard deviation accepted, after normalizing the data if a given
+    :param nb_sig: standard deviation accepted, after normalizing the data if a given
     value is superior to nb_sig then it is set to nan
-    :return:
+    :return: clean dataset
     """
 
     # Find the jet_num column by looking for the largest amount of 1, 2 and 3
@@ -200,10 +216,17 @@ def drop_empty(tx, thres, nb_sig):
     return tx_z
 
 
-def sep_by_jet(tx, y, jets, jet_col = 0):
-    # Split data into subdatasets of different number of jet (which is the jet_num value)
-    # because different number of particles means different behaviors and proportions (mass, etc.)
-    # Note: The col PRI_jet_all_pt has a 0 when jet_num has a 0
+def sep_by_jet(tx, y, jets, jet_col=0):
+    """
+    Split data into sub-datasets of different number of jets (which is the jet_num value)
+    because different number of particles means different behaviors and proportions (mass, etc.)
+    Note: The col PRI_jet_all_pt has a 0 when jet_num has a 0
+    :param tx: dataset of independent variables
+    :param y: class labels (either boson or not - dependent variable)
+    :param jets: number of jets
+    :param jet_col: column containing the number of jets
+    :return: array containing splitted versions of tx,  array containing splitted versions of y
+    """
 
     tX_j = []
     y_j = []
@@ -216,8 +239,20 @@ def sep_by_jet(tx, y, jets, jet_col = 0):
 
 
 def assemble_by_jet(y_0, y_1, y_2, y_3, tx):
+    """
+    Reassembles the data in the 3 jets together
+    :param y_0: class labels, jet 0
+    :param y_1: class labels, jet 1
+    :param y_2: class labels, jet 2
+    :param y_3: class labels, jet 3
+    :param tx: dataset of independent variables
+    :return: assembled class labels
+    """
+
     N = tx.shape[0]
     y = np.zeros(N)
+
+    # jet_num contains the jet number for each row in the initial set
     jet_num = tx[:, 0]
     count_0 = 0;
     count_1 = 0;
@@ -242,23 +277,23 @@ def assemble_by_jet(y_0, y_1, y_2, y_3, tx):
     return y
 
 
-def proc_jet(tx, degree, num_jet, tx_jet):
+def proc_jet(tx_test, degree, num_jet, tx_jet):
     """
     Processes data by selecting those corresponding to the right jet and creating polynomials for the future regression.
-    :param tx: (Multi dimensional array)
-    :param degree: (int)
-    :param num_jet: (int)
-    :param tx_jet:
-    :return: (tuple) Processed train data, processed test data, @ TODO : what is the 3rd ?
+    :param tx_test: (Multi dimensional array) Initial test data
+    :param degree: (int) Polynomial degree desired
+    :param num_jet: (int) Number of the desired jet
+    :param tx_jet: Initial train data, with the desired jet value
+    :return: (tuple) Processed train data, processed test data, boolean mask on the data used for test (true if test)
     """
 
     jet_col = 0
 
-    idx_test = (tx[:, jet_col] == num_jet)
+    idx_test = (tx_test[:, jet_col] == num_jet)
     print('------------------------------------------------------')
     print(idx_test)
 
-    tx_test = tx[idx_test]
+    tx_test = tx_test[idx_test]
 
     # Delete the Jet_col column
     # tx_test_jet = np.delete(tx_test, [jet_col], 1)
@@ -284,10 +319,10 @@ def proc_jet(tx, degree, num_jet, tx_jet):
 
 def confusion_matrix(true, pred):
     """
-    Computes the confusion matrix, as ratios
+    Computes the confusion matrix, as ratios. Top left is (true, true)
     :param true: (Array, either 1 or -1) True results of wether an element is a boson or not.
     :param pred: (Array, either 1 or -1) Predicted results
-    :return: (2 x 2 array) Confusion matrix. Top left is (true, true)
+    :return: (2 x 2 array) Confusion matrix
     """
 
     comparison = np.column_stack((true, pred))
@@ -303,11 +338,8 @@ def confusion_matrix(true, pred):
         # false negative
         elif np.array_equal(elem, np.array([1, -1])):
             confusion[1, 0] += 1
+        # true negatives
         else:
             confusion[1, 1] += 1
 
     return confusion / len(true)
-
-
-
-
