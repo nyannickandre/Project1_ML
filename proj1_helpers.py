@@ -209,9 +209,9 @@ def drop_trash(tx, thres, nb_sig):
     tx_z = tx_z[:, cleaner]  # Delete column where there is too many nan
 
     # Print the column that are dropped
-    for i in range(D):
-        if perc[i] > thres:
-            print('The {}th column is dropped'.format(i + 1))
+    # for i in range(D):
+        # if perc[i] > thres:
+            # print('The {}th column is dropped'.format(i + 1))
 
     return tx_z
 
@@ -290,8 +290,8 @@ def proc_jet(tx_test, degree, num_jet, tx_jet):
     jet_col = 0
 
     idx_test = (tx_test[:, jet_col] == num_jet)
-    print('------------------------------------------------------')
-    print(idx_test)
+    # print('------------------------------------------------------')
+    # print(idx_test)
 
     tx_test = tx_test[idx_test]
 
@@ -300,7 +300,7 @@ def proc_jet(tx_test, degree, num_jet, tx_jet):
 
     # Build a polynomial function of given degree
     tx_train_poly = build_poly(tx_jet, degree)
-    print('------------------------------------------------------')
+    # print('------------------------------------------------------')
 
     tx_test_poly = build_poly(tx_test, degree)
 

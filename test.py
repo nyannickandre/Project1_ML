@@ -6,11 +6,13 @@ from implementations import *
 DATA_TRAIN_PATH = 'data/train.csv'  # TODO: download train data and supply path here
 y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 
-DEGREE = 6
-LAMBDA_ = 1e-6
+DEGREE = 10
+LAMBDA_ = 1e-15
 JETS = 4
-MAX_ITERS = 15
-GAMMA = 0.1
+MAX_ITERS = 100
+GAMMA = 0.3
+
+LAMBDA_RR = [1e-10, 1e-11, 1e-8, 1e-15]
 
 # print('Loading test data...')
 # DATA_TEST_PATH = 'data/test.csv' # TODO: download train data and supply path here
@@ -27,26 +29,33 @@ y_pred = []
 
 for i in range(0, JETS):
     tx_train, tx_test, idx_test = proc_jet(tX_final, DEGREE, i, tX_j[i])
-    w, _ = ridge_regression(y_j[i], tx_train, LAMBDA_)
-    initial_w = w # TODO : Find a correct initial_w
+    # w, _ = ridge_regression(y_j[i], tx_train, LAMBDA_)
+    # initial_w = np.full(len(w), 10e-6) # TODO : Find a correct initial_w
     # w, _ = least_squares_GD(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
     # w, _ = least_squares_SGD(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
     # w, _ = least_squares(y_j[i], tx_train)
-    # w, _ = logistic_regression(y, tx_train, initial_w, MAX_ITERS, GAMMA) # TODO : Does not work properly
-    # w, _ = reg_logistic_regression(y, tx_train, LAMBDA_, initial_w, MAX_ITERS, GAMMA) # TODO : Does not work properly
-    print("w = ", w)
+    # w, _ = logistic_regression(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
+    # w, _ = reg_logistic_regression(y_j[i], tx_train, LAMBDA_, initial_w, MAX_ITERS, GAMMA)
+    
+    # Using RR as the best function and tuning one lambda per jet_num
+    w, _ = ridge_regression(y_j[i], tx_train, LAMBDA_RR[i])
+    # print("w = ", w)
     y_pred.append(predict_labels(w, tx_test))
 
 # assembles predicted class labels
 y_pred_tot = assemble_by_jet(y_pred[0], y_pred[1], y_pred[2], y_pred[3], tX_final)
 
-print(y_pred_tot[:20])
+# print(y_pred_tot[:20])
 
 percentage_accuracy = sum(np.array(y == y_pred_tot, dtype=int)) * 100 / len(y)
 print('-------------------------------------------------------------------')
 print('The prediction is {}% accurate'.format(percentage_accuracy))
 
 print(confusion_matrix(y, y_pred_tot))
+# Find F1-score using TP, TN, FP, FN
+# TP, FP, FN, TN = confusion_matrix(y, y_pred_tot)
+# F1 = TP/(TP + 0.5*(FP + FN))
+# print('The F1-score is {}%'.format(F1))
 
 # -------------
 

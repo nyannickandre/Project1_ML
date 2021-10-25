@@ -39,6 +39,8 @@ def compute_logistic_pred(tx, w):
 
 def compute_logistic_gradient(y, tx, w):
     """Computes logistic gradient."""
+    w = w.reshape(-1)
+    y = y.reshape(-1)
     err = y - compute_logistic_pred(tx, w)
     grad = -tx.T.dot(err)
     return grad
@@ -59,14 +61,16 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     :param gamma: Size of step
     :return: Weights, losses
     """
+    
+    masked_tx = np.nan_to_num(tx)
     # Define parameters to store w and loss
     w = initial_w
     # Lopp for computing w
     for n_iter in range(max_iters):
-        grad = compute_gradient(y, tx, w)
+        grad = compute_gradient(y, masked_tx, w)
         w = w - gamma * grad
 
-    loss = compute_loss(y, tx, w)
+    loss = compute_loss(y, masked_tx, w)
 
     return w, loss
 
@@ -81,17 +85,20 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     :param gamma: Size of step
     :return: Weights, losses
     """
+    
+    masked_tx = np.nan_to_num(tx)
+    
     w = initial_w
 
     for n_iter in range(max_iters):
-        for y_batch, tx_batch in batch_iter(y, tx):
+        for y_batch, tx_batch in batch_iter(y, masked_tx):
             # compute a stochastic gradient and loss
             grad = compute_gradient(y_batch, tx_batch, w)
             # update w through the stochastic gradient update
             w = w - gamma * grad
 
     # calculate loss
-    loss = compute_loss(y, tx, w)
+    loss = compute_loss(y, masked_tx, w)
 
     return w, loss
 
@@ -124,6 +131,8 @@ def least_squares(y, tx):
     :return: Weight, loss
     """
     w, loss = ridge_regression(y, tx, NULL_LAMBDA)
+
+    loss = compute_loss(y, tx, w)
     return w, loss
 
 
@@ -138,14 +147,16 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     :param gamma: Size of step
     :return: Weights, losses
     """
+    
+    masked_tx = np.nan_to_num(tx)
     # Define parameters to store w and loss
     w = initial_w
     # Loop for computing w
     for n_iter in range(max_iters):
-        grad = compute_logistic_gradient(y, tx, w) + 2 * lambda_ * w
+        grad = compute_logistic_gradient(y, masked_tx, w) + 2 * lambda_ * w
         w = w - gamma * grad
 
-    loss = compute_logistic_loss(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
+    loss = compute_logistic_loss(y, masked_tx, w) + lambda_ * np.squeeze(w.T.dot(w))
 
     return w, loss
 
@@ -161,8 +172,10 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
     :param gamma: Size of step
     :return: Weights, losses
     """
+    
+    masked_tx = np.nan_to_num(tx)
 
-    w, loss = reg_logistic_regression(y, tx, NULL_LAMBDA, initial_w, max_iters, gamma)
+    w, loss = reg_logistic_regression(y, masked_tx, NULL_LAMBDA, initial_w, max_iters, gamma)
 
     return w, loss
 
