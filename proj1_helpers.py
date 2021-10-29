@@ -2,6 +2,7 @@
 """some helper functions for project 1."""
 import csv
 import numpy as np
+from implementations import sigmoid
 
 
 # ------------- Helpers for the project --------------------
@@ -25,7 +26,7 @@ def load_csv_data(data_path, sub_sample=False):
     return yb, input_data, ids
 
 
-def predict_labels(weights, data):
+def predict_labels(weights, data, sigm = False):
     """
     Generates class predictions given weights, and a test data matrix
     :param weights: Predicted weights
@@ -277,13 +278,57 @@ def assemble_by_jet(y_0, y_1, y_2, y_3, tx):
     return y
 
 
-def proc_jet(tx_test, degree, num_jet, tx_jet):
+def randomize(tx):
+    """
+    Returns a randomized set of indexes of the legth of the first dimensions dataset
+    :param tx: dataset
+    :return: array of indexes
+    """
+
+    # extract the total length
+    length = tx.shape[0]
+    # choose a seed for reusability purpose
+    np.random.seed(1)
+    perms = np.random.permutation(length)
+
+    return perms
+
+
+def split_train_test(tx_j, tx_cleaned_j, y_j, current_cross, total_crosses):
+    """
+    :param tx_j: Initial train data (dependent variables), with the desired jet value
+    :param tx_cleaned_j: Initial data (dependent variables), with the desired jet value. Used to extract test data.
+    :param y_j:
+    :param current_cross:
+    :param total_crosses:
+    :return: (tuple) tx_train, tx_test, y_train, y_test
+    """
+    N = tx_cleaned_j.shape[0]
+    start_cut_test = int(np.floor(N*current_cross/total_crosses))
+    end_cut_test = int(np.floor(N*(current_cross+1)/total_crosses))
+
+    perms = randomize(tx_cleaned_j)
+    cut_test = perms[start_cut_test:end_cut_test]
+    cut_train = np.delete(perms,cut_test)
+
+    tx_test = tx_cleaned_j[perms[cut_test]]
+    tx_train = tx_j[perms[cut_train]]
+    y_test = y_j[perms[cut_test]]
+    y_train = y_j[perms[cut_train]]
+    return tx_train, tx_test, y_train, y_test
+
+
+
+def proc_jet(tx_test, tx_jet, y_jet, degree, num_jet, current_cross, total_crosses):
     """
     Processes data by selecting those corresponding to the right jet and creating polynomials for the future regression.
-    :param tx_test: (Multi dimensional array) Initial test data
+    :param tx_test: (Multi dimensional array) Initial data cleaned, will be used to compute the test set
+    :param tx_jet: (Multi dimensional array) Initial train data, with the desired jet value
+    :param y_jet: (One dimensional array) Output data (dependent variables). Will be splitted between test and train.
     :param degree: (int) Polynomial degree desired
-    :param num_jet: (int) Number of the desired jet
-    :param tx_jet: Initial train data, with the desired jet value
+    :param num_jet: (int) Number of the desired jets.
+    :param current_cross: (int) Current cross validation group (from 0 to total_crosses-1)
+    :param total_crosses: (int) Total number of K validation groups
     :return: (tuple) Processed train data, processed test data, boolean mask on the data used for test (true if test)
     """
 
@@ -312,7 +357,7 @@ def proc_jet(tx_test, degree, num_jet, tx_jet):
     tx_off = np.insert(tx_train_stand, 0, np.ones(tx_jet.shape[0]), axis=1)
     tx_test_off = np.insert(tx_test_stand, 0, np.ones(tx_test_stand.shape[0]), axis=1)
 
-    return tx_off, tx_test_off, idx_test
+    return split_train_test(tx_off, tx_test_off, y_jet, current_cross, total_crosses)
 
 
 # ------- Test -------
