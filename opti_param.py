@@ -26,6 +26,7 @@ tX_j, y_j = sep_by_jet(tX_final, y, JETS)
 
 # arrays to fill to plot the optimized degrees, and lambdas, 
 # in order to get the best combination of degree and lambda
+# add an additional loop on LAMBDA_JET in np.geomspace(1,1e-15,16) before the DEGREE's one
 # opti0 = []
 # opti1 = []
 # opti2 = []
