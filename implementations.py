@@ -1,7 +1,7 @@
 # Useful starting lines
 
 import numpy as np
-from proj1_helpers import *
+from proj1_helpers import batch_iter
 
 
 NULL_LAMBDA = 1e-15

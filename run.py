@@ -18,8 +18,8 @@ THRES = 20
 NB_SIG = 3
 
 #Parameters for regression
-DEGREE = 6
-LAMBDA_ = 1e-15
+DEGREE = 8
+LAMBDA_ = 0.1
 JETS = 4
 MAX_ITERS = 100
 GAMMA = 0.3
@@ -54,7 +54,7 @@ for i in range(0, JETS):
     for k in range(CROSS_VALIDATIONS):
         tx_train, tx_test, y_train, y_test = cross_val(tX_final, tX_j[i], y_j[i], DEGREE_JET[i], i, k, CROSS_VALIDATIONS)
         w, _ = ridge_regression(y_train, tx_train, LAMBDA_JET[i])
-        # initial_w = np.full(tx_train.shape[1], 10e-6)
+        initial_w = np.full(tx_train.shape[1], 10e-6)
         # w, _ = least_squares_GD(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
         # w, _ = least_squares_SGD(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
         # w, _ = least_squares(y_train, tx_train)
@@ -70,10 +70,17 @@ for i in range(0, JETS):
     print('For jet {} : {}% accuracy'.format(i, sum(accuracies)/len(accuracies)))
 
 
+# uncomment the functions below to try different implemented models
 
-for i in range(0, JETS):
+for i in range(0, JETS):#-------------------- put DEGREE_JET[i] right below for the modified RR
     tx_train, tx_test, _ = proc_jet(tX_final,tX_j[i], DEGREE_JET[i], i)
     w, _ = ridge_regression(y_j[i], tx_train, LAMBDA_JET[i])
+    # initial_w = np.full(tx_train.shape[1], 10e-6)
+    # w, _ = least_squares_GD(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
+    # w, _ = least_squares_SGD(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
+    # w, _ = least_squares(y_j[i], tx_train)
+    # w, _ = logistic_regression(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
+    # w, _ = reg_logistic_regression(y_j[i], tx_train, LAMBDA_, initial_w, MAX_ITERS, GAMMA)
     y_pred.append(predict_labels(w, tx_test))  
     weights.append(w)
     
@@ -85,6 +92,11 @@ print('Overall prediction of y for the train dataset is {}% accurate'.format(per
 print('')
 print('The confusion matrix of the training test:')
 print(confusion_matrix(y, y_pred_tot))
+
+TP = confusion_matrix(y, y_pred_tot)[0, 0]
+FP = confusion_matrix(y, y_pred_tot)[0, 1]
+FN = confusion_matrix(y, y_pred_tot)[1, 0]
+print('The overall F1-score is',(TP/(TP + 0.5*(FP + FN))))
 
 
 print('')
