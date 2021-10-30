@@ -105,3 +105,4 @@ axs[1, 1].set_xlabel('Degree')
 axs[1, 1].grid()
 plt.show()
 
+

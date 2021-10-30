@@ -1,8 +1,6 @@
 # Useful starting lines
 
 import numpy as np
-import matplotlib.pyplot as plt
-import sys
 from proj1_helpers import *
 
 

@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from proj1_helpers import *
 from implementations import *
 
@@ -101,7 +100,7 @@ tX_testj, _ = sep_by_jet(tX_test_final, np.zeros(tX_test_final.shape[0]), JETS)
 
 
 # just a nice empty array to be filled, we will add here our predictions
-y_pred_test= []
+y_pred_test = []
 
 for i in range(0, JETS):
     tX_test_train, tX_test_test, _ = proc_jet(tX_test_final,tX_testj[i], DEGREE_JET[i], i)
