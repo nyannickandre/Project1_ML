@@ -5,6 +5,10 @@ from implementations import *
 DATA_TRAIN_PATH = 'data/train.csv'
 y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 
+# Parameters for preprocessing
+THRES = 20
+NB_SIG = 3
+
 JETS = 4
 CROSS_VALIDATIONS = 5
 
@@ -12,7 +16,7 @@ CROSS_VALIDATIONS = 5
 LAMBDA_JET = [1e-11, 1e-9, 1e-15, 1e-15]
 
 # initial cleaning
-tX_final = drop_trash(tX, 20, 3)
+tX_final, tX_mean, tX_dev, drop_colX = drop_trash(tX, THRES, NB_SIG)
 
 
 # we split the data by jet values, more info in the "sep_by_jet" function
@@ -39,14 +43,14 @@ for DEGREE_JET in range(1,13):
     for i in range(0, JETS):
         accuracies = []
         for k in range(CROSS_VALIDATIONS):
-            tx_train, tx_test, y_train, y_test = proc_jet(tX_final, tX_j[i], y_j[i], DEGREE_JET, i, k, CROSS_VALIDATIONS)
+            tx_train, tx_test, y_train, y_test = cross_val(tX_final, tX_j[i], y_j[i], DEGREE_JET, i, k, CROSS_VALIDATIONS)
             w, _ = ridge_regression(y_train, tx_train, LAMBDA_JET[i])
  
             y_pred_jet = predict_labels(w, tx_test)
             percentage_accuracy = sum(np.array(y_test == y_pred_jet, dtype=int)) / len(y_test)
             accuracies.append(percentage_accuracy)
             
-            TP = confusion_matrix(y_test, y_pred_jet)[1, 1]
+            TP = confusion_matrix(y_test, y_pred_jet)[0, 0]
             FP = confusion_matrix(y_test, y_pred_jet)[0, 1]
             FN = confusion_matrix(y_test, y_pred_jet)[1, 0]
             
