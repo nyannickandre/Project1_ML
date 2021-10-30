@@ -28,7 +28,6 @@ CROSS_VALIDATIONS = 5
 
 #Parameters for ridge
 DEGREE_JET = [6, 6, 11, 9]
-#LAMBDA_JET = [1e-11, 1e-9, 1e-15, 1e-15]
 LAMBDA_JET = [1e-11, 1e-9, 1e-15, 1e-15]
 
 print('')
@@ -81,12 +80,6 @@ for i in range(0, JETS):
     y_pred.append(predict_labels(w, tx_test))  
     weights.append(w)
     
-# TODO : read the comment below <3
-# assembles predicted class labels
-# This will probably not work anymore, but we don't really care. we optimize the lambda using cross validation
-# and once found, we use this lambda on the whole jet, using directly the run.py function
-# so basically, once you found the best lambda parameters, just use them in the run.py and compute the whole
-# output there. Cheers!
 
 y_pred_tot = assemble_by_jet(y_pred[0], y_pred[1], y_pred[2], y_pred[3], tX_final)
 percentage_accuracy = sum(np.array(y == y_pred_tot, dtype=int)) * 100 / len(y)
@@ -95,10 +88,6 @@ print('Overall prediction of y for the train dataset is {}% accurate'.format(per
 print('')
 print('The confusion matrix of the training test:')
 print(confusion_matrix(y, y_pred_tot))
-#Find F1-score using TP, TN, FP, FN
-# TP, FP, FN, TN = confusion_matrix(y, y_pred_tot)
-# F1 = TP/(TP + 0.5*(FP + FN))
-# print('The F1-score is {}%'.format(F1))
 
 
 print('')
@@ -121,8 +110,6 @@ for i in range(0, JETS):
 y_pred_test_tot = assemble_by_jet(y_pred_test[0], y_pred_test[1], y_pred_test[2], y_pred_test[3], tX_test_final)
 
 
-OUTPUT_PATH = 'final_submission.csv' # TODO: fill in desired name of output file for submission
+OUTPUT_PATH = 'final_submission.csv'
 create_csv_submission(ids_test, y_pred_test_tot, OUTPUT_PATH)
-
-# TODO : Delete the "prints" used for debugging in all files
 
