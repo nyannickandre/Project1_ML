@@ -85,9 +85,6 @@ def build_poly(x, degree):
     for deg in range(1, degree + 1):
         poly = np.c_[poly, np.power(x, deg)]
 
-    # poly = x.copy()
-    # for deg in range(2, degree + 1):
-    #     poly = np.hstack([poly, poly**deg])
 
     return poly
 
@@ -209,13 +206,14 @@ def drop_trash(tx, thres, nb_sig):
     cleaner = perc < thres
     tx_z = tx_z[:, cleaner]  # Delete column where there is too many nan
 
-    # Print the column that are dropped
-    # for i in range(D):
-        # if perc[i] > thres:
+    # Store the column that are dropped
+    drop_col = []
+    for i in range(D):
+        if perc[i] > thres:
+            drop_col.append(i)
             # print('The {}th column is dropped'.format(i + 1))
 
-    return tx_z
-
+    return tx_z, tx_mean, tx_dev, drop_col
 
 def sep_by_jet(tx, y, jets, jet_col=0):
     """
@@ -317,9 +315,7 @@ def split_train_test(tx_j, tx_cleaned_j, y_j, current_cross, total_crosses):
     y_train = y_j[perms[cut_train]]
     return tx_train, tx_test, y_train, y_test
 
-
-
-def proc_jet(tx_test, tx_jet, y_jet, degree, num_jet, current_cross, total_crosses):
+def proc_jet(tx_test, tx_jet, degree, num_jet ):
     """
     Processes data by selecting those corresponding to the right jet and creating polynomials for the future regression.
     :param tx_test: (Multi dimensional array) Initial data cleaned, will be used to compute the test set
@@ -327,9 +323,7 @@ def proc_jet(tx_test, tx_jet, y_jet, degree, num_jet, current_cross, total_cross
     :param y_jet: (One dimensional array) Output data (dependent variables). Will be splitted between test and train.
     :param degree: (int) Polynomial degree desired
     :param num_jet: (int) Number of the desired jets.
-    :param current_cross: (int) Current cross validation group (from 0 to total_crosses-1)
-    :param total_crosses: (int) Total number of K validation groups
-    :return: (tuple) Processed train data, processed test data, boolean mask on the data used for test (true if test)
+    :return: (tuple) Processed train data, processed test data
     """
 
     jet_col = 0
@@ -357,7 +351,26 @@ def proc_jet(tx_test, tx_jet, y_jet, degree, num_jet, current_cross, total_cross
     tx_off = np.insert(tx_train_stand, 0, np.ones(tx_jet.shape[0]), axis=1)
     tx_test_off = np.insert(tx_test_stand, 0, np.ones(tx_test_stand.shape[0]), axis=1)
 
+    return tx_off, tx_test_off, idx_test
+
+def cross_val(tx_test, tx_jet, y_jet, degree, num_jet, current_cross, total_crosses):
+    """
+    Cross validating the data by using proc_jet 
+    :param tx_test: (Multi dimensional array) Initial data cleaned, will be used to compute the test set
+    :param tx_jet: (Multi dimensional array) Initial train data, with the desired jet value
+    :param y_jet: (One dimensional array) Output data (dependent variables). Will be splitted between test and train.
+    :param degree: (int) Polynomial degree desired
+    :param num_jet: (int) Number of the desired jets.
+    :param current_cross: (int) Current cross validation group (from 0 to total_crosses-1)
+    :param total_crosses: (int) Total number of K validation groups
+    :return: (tuple) Processed train data, processed test data, boolean mask on the data used for test (true if test)
+    """
+
+    tx_off, tx_test_off, idx_test = proc_jet(tx_test, tx_jet, degree, num_jet )
+
     return split_train_test(tx_off, tx_test_off, y_jet, current_cross, total_crosses)
+
+
 
 
 # ------- Test -------
@@ -388,3 +401,50 @@ def confusion_matrix(true, pred):
             confusion[1, 1] += 1
 
     return confusion / len(true)
+
+def preproc_test(tx, tx_mean, tx_dev, drop_col,nb_sig):
+    """
+    Cleans test dataset to make it match with the train dataset
+    :param tx_dev , tx_mean: Mean and standard deviation of the training dataset
+    :param drop_col: columns to be removed from tx
+    :param nb_sig: standard deviation accepted 
+    :return: preprocess test dataset on which the weights can be applied 
+    """
+
+    # Find the jet_num column by looking for the largest amount of 1, 2 and 3
+    _, col = np.where((tx == 1) | (tx == 2) | (tx == 3))
+    jet_col = np.argmax(np.bincount(col))  # Find the index of the jet_num column
+
+    # Create the jet_num vector
+    jet_num = tx[:, jet_col]
+    jet_num = jet_num.reshape(-1, 1)
+
+    # Create a copy of tx and delete the jet_num column from this copy
+    tx_clean = tx.copy()
+    tx_clean = np.delete(tx_clean, jet_col, axis=1)
+
+    # Get the shape of tx
+    N = tx.shape[0]
+    D = tx.shape[1]
+
+    # Change all the -999 in tx_clean into nan
+    tx_clean[tx_clean == -999] = np.NAN
+
+
+    # Create tx_z as the normalization of tx_clean
+    tx_z = (tx_clean - tx_mean[None, :]) / tx_dev[None, :]
+
+    # Change the outliers in each column into nan
+    # Small issues with the two following lines: create a runtime warning error
+    tx_z[tx_z > nb_sig] = np.NAN
+    tx_z[tx_z < -nb_sig] = np.NAN
+
+    # Put jet_num back into tx_z in the first column
+    tx_z = np.concatenate((jet_num, tx_z), axis=1)
+    
+    #Remove the dropped column from tx_z
+
+    tx_z = np.delete(tx_z, drop_col, axis=1)
+        
+        
+    return tx_z
