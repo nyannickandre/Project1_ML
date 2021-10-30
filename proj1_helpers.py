@@ -2,7 +2,7 @@
 """some helper functions for project 1."""
 import csv
 import numpy as np
-from implementations import sigmoid
+from implementations import *
 
 
 # ------------- Helpers for the project --------------------

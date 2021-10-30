@@ -9,6 +9,14 @@ y, tX, ids = load_csv_data(DATA_TRAIN_PATH)
 THRES = 20
 NB_SIG = 3
 
+# --------------------- remove below -------------------
+LAMBDA_ = 1e-15
+MAX_ITERS = 100
+GAMMA = 0.006
+
+# --------------------- remove above -------------------
+
+
 JETS = 4
 CROSS_VALIDATIONS = 5
 
@@ -37,18 +45,27 @@ deg_graph2 = []
 deg_graph3 = []
 
 # array to fill in the F1-score along the loops
-F1 = []
+acc_tot = []
+f1_tot = []
 
-for DEGREE_JET in range(1,13):
+for DEGREE_JET in range(8,9): # set range(1,13) to hand-in
     for i in range(0, JETS):
         accuracies = []
+        F1 = []
         for k in range(CROSS_VALIDATIONS):
             tx_train, tx_test, y_train, y_test = cross_val(tX_final, tX_j[i], y_j[i], DEGREE_JET, i, k, CROSS_VALIDATIONS)
             w, _ = ridge_regression(y_train, tx_train, LAMBDA_JET[i])
+            initial_w = np.full(tx_train.shape[1], 10e-6)
+            # w, _ = least_squares_GD(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
+            # w, _ = least_squares_SGD(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
+            # w, _ = least_squares(y_train, tx_train)
+            # w, _ = logistic_regression(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
+            # w, _ = reg_logistic_regression(y_train, tx_train, LAMBDA_, initial_w, MAX_ITERS, GAMMA)
  
             y_pred_jet = predict_labels(w, tx_test)
             percentage_accuracy = sum(np.array(y_test == y_pred_jet, dtype=int)) / len(y_test)
             accuracies.append(percentage_accuracy)
+            acc.append(percentage_accuracy)
             
             TP = confusion_matrix(y_test, y_pred_jet)[0, 0]
             FP = confusion_matrix(y_test, y_pred_jet)[0, 1]
@@ -76,6 +93,7 @@ for DEGREE_JET in range(1,13):
     
         print('For jet {} with degree {}, the prediction has {} acc. and {} F1-score'.format(i, DEGREE_JET, sum(accuracies)/len(accuracies), sum(F1)/len(F1)))
 
+print('Acc tot',np.mean(acc_tot),'and F1 tot',np.mean(f1_tot))
 
 # import matplotlib to be able to plot our results and put it on the report
 import matplotlib.pyplot as plt

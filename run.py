@@ -55,13 +55,11 @@ for i in range(0, JETS):
         tx_train, tx_test, y_train, y_test = cross_val(tX_final, tX_j[i], y_j[i], DEGREE_JET[i], i, k, CROSS_VALIDATIONS)
         w, _ = ridge_regression(y_train, tx_train, LAMBDA_JET[i])
         # initial_w = np.full(tx_train.shape[1], 10e-6)
-        # w, _ = least_squares_GD(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
-        # w, _ = least_squares_SGD(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA)
-        # w, _ = least_squares(y_j[i], tx_train)
-        # w, _ = logistic_regression(y_j[i], tx_train, initial_w, MAX_ITERS, GAMMA) #TODO : why do we have overflows ?
-        # w, _ = reg_logistic_regression(y_j[i], tx_train, LAMBDA_, initial_w, MAX_ITERS, GAMMA) #TODO : why do we have overflows ?
-        # Using RR as the best function and tuning one lambda per jet_num
-        # w, _ = ridge_regression(y_j[i], tx_train, LAMBDA_JET[i])
+        # w, _ = least_squares_GD(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
+        # w, _ = least_squares_SGD(y_train, tx_train, initial_w, MAX_ITERS, GAMMA)
+        # w, _ = least_squares(y_train, tx_train)
+        # w, _ = logistic_regression(y_train tx_train, initial_w, MAX_ITERS, GAMMA)
+        # w, _ = reg_logistic_regression(y_train, tx_train, LAMBDA_, initial_w, MAX_ITERS, GAMMA) 
 
         # ---------------------------------------------------------------------------------------
         y_pred_jet = predict_labels(w, tx_test)
