@@ -17,12 +17,32 @@ All of the implementations carried out in this project were done on Python, only
 - `run.py`: the main file of the project which upon running will create (or update) a file named `final_submission.csv` containing the ID column and label prediction for the test set. Submitting this file on the competition platform will yield *Categorical Accuracy* of 0.819 and a *F1-Score* of 0.720. 
 
 - `implementations.py`: the file containing the various ML methods implemented and tested on the training dataset.
-- `proj1_helpers.py`: the file containing the additional methods that helps preprocess and clean the datasets and/or improve and tune the model see [below](#id)
+- `proj1_helpers.py`: the file containing the additional methods that helps preprocess and clean the datasets and/or improve and tune the model 
 - `opti_param.py`: an additional file that follows that iterates on the training dataset to find the optimal parameters for the methods used in `run.py`
 
 A more thorough description of each file is given below.
 
-## Machine Learning methods
+## How to run the program
+
+In order to run the program, only the file `run.py` is required to be opened. The file structure is as follows:
+
+*   Loading of the datasets (Train and Test) in their vector/matrix form using the helpers methods 
+*   Input the parameters to be used: 
+    -   The parameters for preprocessing: 
+
+    > THRES: the threshold at which a column of the train dataset is removed if the proportion of missing values + outliers is superior to that threshold
+
+    > NB_SIG:  a specified number of standard deviation should given after standardization of the datasets to define the value at which a value is considered as an outlier
+
+    -   Parameters for regression: used for all basic methods in `implementations.py` 
+    > LAMBDA_ , MAX_ITERS , GAMMA: basic input required to use the regression methods 
+    > CROSS_VALIDATIONS: number of k-folds used for the cross validation
+    > JETS = 4: number of jets found in the jet_num column feature of the dataset
+    
+    -   Parameters for the optimized ridge regression:
+    >   DEGREE_JET, LAMBDA_JET: vectors of 4 value containing respectively the optimal value of degree and lambda for the regression realized on each of the 4 jets
+
+### Machine Learning methods
 
 The following basic ML methods, developed during the [course labs](https://github.com/epfml/ML_course) were implemented in the `implementations.py` file:  
 | Functions      | Description |
@@ -46,46 +66,59 @@ All of these functions returns as output the tuple (*w*, *loss*), which are resp
 
 In order to simplify the algorithms, intermediary methods were implemented to compute the error, the gradient and the loss associated to the regression methods. Additionally, a function to compute the sigmoid was written for the logistic regression and as such the error, gradient and loss computations were implemented separately for the two logistic regression methods.
 
-## Helpers methods {#id}
+### Helpers methods 
 
-The `proj1_helpers.py` file is divided in three parts: 
+The `proj1_helpers.py` file is divided in four parts: 
 
 #### Helpers for the project 
-This part comprised with the following functions provided at the beginning of the project:
->
-        load_csv_data(data_path, sub_sample=False):
-            """ Loads csv dataset """
-            return: binary class label, dataset of independent variables, event ids
->
-        predict_labels(weights, data, sigma = False):
-            """ Generates class predictions given weights, and a test data matrix """
-            return: Predicted class labels
->
-        create_csv_submission(ids, y_pred, name):
-            """ Creates an output file with predictions in CSV format for submission """
-            return: None
+This part is comprised with helpers functions provided at the beginning of the project:
+>        load_csv_data: Loads csv dataset 
+
+>       predict_labels: Generates class predictions given the weights and a test data matrix 
+
+>       create_csv_submission: Creates the csv submission file with the predictions 
+
 #### Helpers from previous labs
 
 This part which contains helpers functions used in previous labs exercices that were deemed significant for the ML model used in this project: 
->
-    split_data(x, y, ratio, myseed=1):
-        """split the dataset based on the split ratio."""
->   
-    build_poly(x, degree):
-        """polynomial basis functions for input data x, for j=0 up to j=degree."""
->
-    standardize(x):
-        """Standardize the original data set."""
+>       split_data: Split the dataset based on the split ratio
 
->
-    build_model_data(height, weight):
-        """Form (y,tX) to get regression data in matrix form."""
->   
-    batch_iter(y, tx, batch_size=1, num_batches=1, shuffle=True):
-        """ Generate a minibatch iterator for a dataset."""
-        
-#### Clean and preprocess
+>       build_poly: Return polynomial basis functions for input data up to specified degree
     
+>       standardize: Standardize the original data set
+
+>       build_model_data: Form (y,tX) to get regression data in vector/matrix form.
+
+>       batch_iter: Generate a minibatch iterator for a dataset.
+
+#### Clean and preprocess
+In this part, the methods were entirely created by our team to tune the model: 
+>       stat_val: Generates the mean and standard deviation to standardized the dataset 
+
+>       drop_trash: Cleans dataset of outliers and strange columns 
+
+>       sep_by_jet: Split data into sub-datasets depending on their jet_num value
+
+>       assemble_by_jet: Reassembles the class label prediction of all jets together
+
+>       randomize: Returns a randomized set of indexes the length of the dataset rows
+
+>       split_train_test: Split the train set according to the number of k-folds for the cross validation
+
+>       proc_jet: Processes data by selecting those corresponding to the right jet and creating polynomials for the future regression.
+
+>       cross_val: Cross validating the data by using proc_jet 
+
+#### Test
+In this part, the methods implementesd are those that allow to check the accuracy of the model training and allow to preprocess the test set:
+
+>       confusion_matrix: Computes the 2 x 2 confusion matrix for the training dataset
+
+>       preproc_test:  Cleans test dataset to make it match with the train dataset. Same standardization, columns dropped and outliers removed 
+
+
+ 
+
 
 ## TODOs and perspectives
 
