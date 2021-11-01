@@ -53,11 +53,11 @@ In order to run the program, only the file `run.py` is required to be opened. Th
 
         The current parameter DEGREE_JET[i] is the optimal degree for the modified ridge regression, and should be replaced by DEGREE if another method is used
         
-    -   Currently the weights are obtained with a basic ridge_regression applied on each sub-dataset using the following lines of code: 
+    -   Currently the weights are obtained with a basic ridge_regression applied on each sub-dataset using the following line of code: 
 
                 w, _ = ridge_regression(y_j[i], tx_train, LAMBDA_JET[i])
                 
-         In the case another method is user, the user can comment the line above and uncomment one of the commented lines within the loop to call one of the other ML methods implemented.
+         In the case another method is used, the user can comment the line above and uncomment one of the commented lines within the loop to call one of the other ML methods implemented.
         Note that the following line needs to be uncommented for all methods requiring initial weights as input. 
         
             initial_w = np.full(tx_train.shape[1], 10e-6)
@@ -65,7 +65,7 @@ In order to run the program, only the file `run.py` is required to be opened. Th
 
 - The code will then display the accuracy, confusion matrix and F1-score of the model on the train dataset.  
 
-- The test dataset labels are then obtained by preprocessing the dataset, then using the weigth calculated in the training part. Finally the ids and labels are written into a csv file that can be submitted on the comprtition platform.
+- The test dataset labels are then obtained by preprocessing the dataset, then using the weigth calculated in the training part. Finally the IDs and labels are written into a csv file that can be submitted on the comprtition platform.
 
 **NOTE**: The `opti_param.py` file follows the structure of `run.py` but iterates on the degree and/or the lambdas to find the optimal paramaters by finding the combination that produced the best accuracy.
 
