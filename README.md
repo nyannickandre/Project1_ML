@@ -1,4 +1,4 @@
-# Preoject1_ML: Higgs Boson Recognition
+# Project1_ML: Higgs Boson Recognition
 
 Authors: Yannick Neypatraiky, Stefan Rotarus & Paul Habert
 
@@ -35,7 +35,7 @@ In order to run the program, only the file `run.py` is required to be opened. Th
     > NB_SIG:  a specified number of standard deviation should given after standardization of the datasets to define the value at which a value is considered as an outlier
 
     -   Parameters for regression: used for all basic methods in `implementations.py` 
-    > LAMBDA_ , MAX_ITERS , GAMMA: basic input required to use the regression methods 
+    > LAMBDA_ , MAX_ITERS , GAMMA: basic input parameters required to use the regression methods 
     
     > CROSS_VALIDATIONS: number of k-folds used for the cross validation
     
