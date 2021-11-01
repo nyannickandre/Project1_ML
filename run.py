@@ -32,7 +32,7 @@ LAMBDA_JET = [1e-11, 1e-9, 1e-15, 1e-15]
 print('')
 print('------------------- RESULTS FOR TRAINING ---------------------------')
 print('')
-print('The cross validation gives the following prediction for each jet:')
+print('The {}-fold cross validation gives the following prediction for each jet:'.format(CROSS_VALIDATIONS))
 print('')
 
 # initial cleaning
@@ -102,6 +102,8 @@ print('The overall F1-score is',(TP/(TP + 0.5*(FP + FN))))
 print('')
 print('------------------- RESULTS FOR TESTING ---------------------------')
 
+
+print('Processing the test set....')
 #initial cleaning
 tX_test_final = preproc_test(tX_test, tX_mean, tX_dev, drop_colX, NB_SIG)
 
@@ -112,6 +114,7 @@ tX_testj, _ = sep_by_jet(tX_test_final, np.zeros(tX_test_final.shape[0]), JETS)
 # just a nice empty array to be filled, we will add here our predictions
 y_pred_test = []
 
+print('Making the predictions...')
 for i in range(0, JETS):
     tX_test_train, tX_test_test, _ = proc_jet(tX_test_final,tX_testj[i], DEGREE_JET[i], i)
     y_pred_test.append(predict_labels(weights[i], tX_test_test))  
@@ -121,4 +124,4 @@ y_pred_test_tot = assemble_by_jet(y_pred_test[0], y_pred_test[1], y_pred_test[2]
 
 OUTPUT_PATH = 'final_submission.csv'
 create_csv_submission(ids_test, y_pred_test_tot, OUTPUT_PATH)
-
+print('The final_submission file have been writing successfully')
