@@ -8,7 +8,7 @@ The **Finding the Higgs Boson** challenge is a popular machine learning competit
 ### Dataset desciption:
 The  codes implemented here allow to create a submission file for the competition platform, in the same format as the `sample-submission.csv` file that is provided.
 
-Two files named `train.csv` and `test.csv` can be taken from [Aicrowd](https://www.aicrowd.com/challenges/epfl-machine-learning-higgs)  which are respectively the training set of 250'000 events and 32 columns (ID column, label column and finally the 30 features columns) and the test set of almost 570'000 events, with the same types of columns at the exception that the label needs to be predicted.
+Two files named `train.csv` and `test.csv` can be taken from [Aicrowd](https://www.aicrowd.com/challenges/epfl-machine-learning-higgs), or by unzipping the file `data.zip`, which are respectively the training set of 250'000 events and 32 columns (ID column, label column and finally the 30 features columns) and the test set of almost 570'000 events, with the same types of columns at the exception that the label needs to be predicted.
 
 The label column is associated with a vector *y* while the 30 features forms a matrix *tX* and the machine learning training realized allow to estimate the vector of weights *w* such that *y ~ tX w*. 
 
